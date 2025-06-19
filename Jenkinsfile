@@ -2,6 +2,7 @@ pipeline {
     agent {
         label 'vps-agent1'
     }
+
     environment {
         GIT_COMMIT_SHORT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
         DOCKER_HUB_USER = "m1kky8"
@@ -10,6 +11,7 @@ pipeline {
         IMAGE_TAG = "${DOCKER_HUB_USER}/${DOCKER_REPO}:${GIT_COMMIT_SHORT}"
         LATEST_TAG = "${DOCKER_HUB_USER}/${DOCKER_REPO}:latest"
     }
+
     stages {
         stage("Docker login and cache") {
             steps {
@@ -18,16 +20,22 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    echo "Logging in to Docker Hub..."
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker pull ${IMAGE_TAG}"
-                    sh "docker pull ${LATEST_TAG}"
+                    script {
+                        echo "Logging in to Docker Hub..."
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+
+                        echo "Pulling cached images (if exist)..."
+                        sh "docker pull ${IMAGE_TAG} || true"
+                        sh "docker pull ${LATEST_TAG} || true"
+                    }
                 }
             }
         }
-        stage("Build docker image"){
+
+        stage("Build docker image") {
             steps {
                 script {
+                    echo "Building Docker image with cache..."
                     sh '''
                         export DOCKER_BUILDKIT=1
                         docker build \
@@ -39,10 +47,13 @@ pipeline {
                 }
             }
         }
-        stage("Push to registry"){
+
+        stage("Push to registry") {
             steps {
-                sh "docker push ${IMAGE_TAG}"
-                sh "docker push ${LATEST_TAG}"
+                script {
+                    echo "Pushing images to Docker Hub..."
+                    sh "docker push ${IMAGE_TAG}"
+                    sh "docker push ${LATEST_TAG}"
                 }
             }
         }
