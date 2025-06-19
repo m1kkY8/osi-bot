@@ -15,6 +15,7 @@ pipeline {
         script {
           def branch = env.BRANCH_NAME
           def imageTag = "${DOCKER_HUB_USER}/${DOCKER_REPO}:${GIT_COMMIT_SHORT}"
+          def latestTag = "${DOCKER_HUB_USER}/${DOCKER_REPO}:latest"
 
           withCredentials([usernamePassword(
             credentialsId: DOCKERHUB_CREDS,
@@ -26,9 +27,15 @@ pipeline {
             
             echo "Building Docker image ${imageTag}..."
             sh "docker build -t ${imageTag} ."
-            
+
+            echo "Tagging as latest..."
+            sh "docker tag ${imageTag} ${latestTag}"
+
             echo "Pushing Docker image ${imageTag}..."
             sh "docker push ${imageTag}"
+
+            echo "Pushing latest tag"
+            sh "docker push ${latestTag}"
           }
         }
       }
