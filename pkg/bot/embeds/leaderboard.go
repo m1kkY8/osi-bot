@@ -12,11 +12,14 @@ func LeaderboardEmbed(page int, users []models.User) (*discordgo.MessageEmbed, [
 	start := page * perPage
 	end := min(start+perPage, len(users))
 
+	currentPage := page + 1
+	footerText := fmt.Sprintf("Page %d/%d", currentPage, (len(users)+perPage-1)/perPage)
+
 	embed := &discordgo.MessageEmbed{
 		Title:  "OSI Leaderboard",
 		Color:  0x2e2e2e,
 		Fields: []*discordgo.MessageEmbedField{},
-		Footer: &discordgo.MessageEmbedFooter{Text: "Use ⬅️ and ➡️ to scroll."},
+		Footer: &discordgo.MessageEmbedFooter{Text: footerText},
 	}
 
 	for i, user := range users[start:end] {

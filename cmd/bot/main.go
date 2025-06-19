@@ -6,17 +6,12 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
-	"github.com/m1kkY8/osi-bot/pkg/api/htb"
-	"github.com/m1kkY8/osi-bot/pkg/bot/embeds"
+	"github.com/m1kkY8/osi-bot/pkg/bot/handlers"
 	"github.com/m1kkY8/osi-bot/pkg/intents"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-var (
-	users   []models.User
-	perPage = 10
-	pageMap = make(map[string]int)
-)
+var users []models.User
 
 func main() {
 	godotenv.Load()
@@ -27,72 +22,15 @@ func main() {
 		return
 	}
 
-	dg.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Content != "!osi" || m.Author.Bot {
-			return
-		}
-		var err error
-		users, err = htb.FetchUsers()
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "Error fetching leaderboard")
-			return
-		}
+	client := models.NewClient(users, dg)
+	pages := models.NewPage(1, 10, 0, make(map[string]int))
 
-		pageMap[m.Author.ID] = 0
-		embed, buttons := embeds.LeaderboardEmbed(0, users)
-		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
-			Embed:      embed,
-			Components: buttons,
-		})
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, "error sending a message")
-			return
-		}
-	})
+	client.DiscordSession.Identify.Intents = intents.SetIntents()
 
-	// Component (button) interaction handler
-	dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionMessageComponent {
-			return
-		}
+	handlers.LeaderboardHandler(client, pages)
+	handlers.LeaderboardInteraction(client, pages)
 
-		userID := i.Member.User.ID
-		page := pageMap[userID]
-
-		switch i.MessageComponentData().CustomID {
-		case "leaderboard_next":
-			page++
-			if page*perPage >= len(users) {
-				page = 0
-			}
-		case "leaderboard_prev":
-			if page == 0 {
-				page = (len(users) - 1) / perPage
-			} else {
-				page--
-			}
-		default:
-			return
-		}
-
-		pageMap[userID] = page
-
-		embed, components := embeds.LeaderboardEmbed(page, users)
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseUpdateMessage,
-			Data: &discordgo.InteractionResponseData{
-				Embeds:     []*discordgo.MessageEmbed{embed},
-				Components: components,
-			},
-		})
-		if err != nil {
-			fmt.Println("Error updating message:", err)
-		}
-	})
-
-	dg.Identify.Intents = intents.SetIntents()
-
-	err = dg.Open()
+	err = client.DiscordSession.Open()
 	if err != nil {
 		fmt.Println("Error opening Discord session:", err)
 		return

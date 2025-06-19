@@ -1,0 +1,15 @@
+package models
+
+import "github.com/bwmarrin/discordgo"
+
+type Client struct {
+	Users          []User
+	DiscordSession *discordgo.Session
+}
+
+func NewClient(users []User, session *discordgo.Session) *Client {
+	return &Client{
+		Users:          users,
+		DiscordSession: session,
+	}
+}
