@@ -39,38 +39,55 @@ func main() {
 		}
 
 		pageMap[m.Author.ID] = 0
-		msg, _ := s.ChannelMessageSendEmbed(m.ChannelID, embeds.LeaderboardEmbed(0, users))
-
-		s.MessageReactionAdd(m.ChannelID, msg.ID, "⬅️")
-		s.MessageReactionAdd(m.ChannelID, msg.ID, "➡️")
+		embed, buttons := embeds.LeaderboardEmbed(0, users)
+		_, err = s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Embed:      embed,
+			Components: buttons,
+		})
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "error sending a message")
+			return
+		}
 	})
 
-	dg.AddHandler(func(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
-		if r.UserID == s.State.User.ID || r.Emoji.Name != "⬅️" && r.Emoji.Name != "➡️" {
+	// Component (button) interaction handler
+	dg.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.Type != discordgo.InteractionMessageComponent {
 			return
 		}
 
-		page, exists := pageMap[r.UserID]
-		if !exists {
-			return
-		}
+		userID := i.Member.User.ID
+		page := pageMap[userID]
 
-		if r.Emoji.Name == "➡️" {
+		switch i.MessageComponentData().CustomID {
+		case "leaderboard_next":
 			page++
 			if page*perPage >= len(users) {
-				page = 0 // Loop back to the start
+				page = 0
 			}
-		} else if r.Emoji.Name == "⬅️" {
+		case "leaderboard_prev":
 			if page == 0 {
-				page = (len(users) / perPage) // Go to the last page
+				page = (len(users) - 1) / perPage
 			} else {
 				page--
 			}
+		default:
+			return
 		}
 
-		pageMap[r.UserID] = page
-		s.MessageReactionRemove(r.ChannelID, r.MessageID, r.Emoji.Name, r.UserID)
-		s.ChannelMessageEditEmbed(r.ChannelID, r.MessageID, embeds.LeaderboardEmbed(page, users))
+		pageMap[userID] = page
+
+		embed, components := embeds.LeaderboardEmbed(page, users)
+		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: &discordgo.InteractionResponseData{
+				Embeds:     []*discordgo.MessageEmbed{embed},
+				Components: components,
+			},
+		})
+		if err != nil {
+			fmt.Println("Error updating message:", err)
+		}
 	})
 
 	dg.Identify.Intents = intents.SetIntents()

@@ -7,7 +7,7 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func LeaderboardEmbed(page int, users []models.User) *discordgo.MessageEmbed {
+func LeaderboardEmbed(page int, users []models.User) (*discordgo.MessageEmbed, []discordgo.MessageComponent) {
 	perPage := 10
 	start := page * perPage
 	end := min(start+perPage, len(users))
@@ -42,5 +42,22 @@ func LeaderboardEmbed(page int, users []models.User) *discordgo.MessageEmbed {
 		embed.Fields = append(embed.Fields, field)
 	}
 
-	return embed
+	buttons := []discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					Label:    "Prev",
+					Style:    discordgo.PrimaryButton,
+					CustomID: "button_prev",
+				},
+				discordgo.Button{
+					Label:    "Next",
+					Style:    discordgo.PrimaryButton,
+					CustomID: "button_next",
+				},
+			},
+		},
+	}
+
+	return embed, buttons
 }
