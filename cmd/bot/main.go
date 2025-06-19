@@ -11,8 +11,6 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-var users []models.User
-
 func main() {
 	godotenv.Load()
 
@@ -22,7 +20,7 @@ func main() {
 		return
 	}
 
-	client := models.NewClient(users, dg)
+	client := models.NewClient(nil, dg)
 	pages := models.NewPage(1, 10, 0, make(map[string]int))
 
 	client.DiscordSession.Identify.Intents = intents.SetIntents()

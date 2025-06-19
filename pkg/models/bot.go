@@ -9,7 +9,7 @@ type Client struct {
 
 func NewClient(users []User, session *discordgo.Session) *Client {
 	return &Client{
-		Users:          users,
+		Users:          []User{},
 		DiscordSession: session,
 	}
 }
