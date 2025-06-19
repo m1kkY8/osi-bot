@@ -21,8 +21,6 @@ WORKDIR /home/appuser
 
 COPY --from=builder /bot .
 
-COPY .env .
-
 USER appuser
 
 ENTRYPOINT ["./bot"]
