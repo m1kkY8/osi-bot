@@ -40,8 +40,6 @@ func BookApiListUsers() []models.BookstackUser {
 		return nil
 	}
 
-	fmt.Printf("[DEBUG] Total users returned: %d\n", len(response.Data))
-
 	for _, user := range response.Data {
 		fmt.Printf("User ID: %d, Name: %s, Email: %s\n", user.ID, user.Name, user.Email)
 	}
