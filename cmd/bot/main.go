@@ -27,6 +27,7 @@ func main() {
 
 	handlers.LeaderboardHandler(client, pages)
 	handlers.LeaderboardInteraction(client, pages)
+	handlers.RegisterUser(client)
 
 	err = client.DiscordSession.Open()
 	if err != nil {
