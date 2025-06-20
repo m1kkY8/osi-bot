@@ -1,4 +1,4 @@
-package handlers
+package interactions
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func LeaderboardInteraction(client *models.Client, pages *models.Page) {
+func UserListInteraction(client *models.Client, pages *models.Page) {
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		fmt.Println("got interaction")
 
@@ -16,32 +16,35 @@ func LeaderboardInteraction(client *models.Client, pages *models.Page) {
 			fmt.Println("not component")
 			return
 		}
-		fmt.Println(i.MessageComponentData().CustomID)
+
+		customID := i.MessageComponentData().CustomID
+		if customID != "button_next_book" && customID != "button_prev_book" {
+			fmt.Println("unknown button")
+			return
+		}
 
 		userID := i.Member.User.ID
 		page := pages.PageMap[userID]
 
-		switch i.MessageComponentData().CustomID {
-		case "button_next":
+		switch customID {
+		case "button_next_book":
 			page++
-			if page*pages.PerPage >= len(client.Users) {
+			if page*pages.PerPage >= len(client.BookstackUsers) {
 				page = 0
 			}
-		case "button_prev":
+		case "button_prev_book":
 			if page == 0 {
-				page = (len(client.Users) - 1) / pages.PerPage
+				page = (len(client.BookstackUsers) - 1) / pages.PerPage
 			} else {
 				page--
 			}
-		default:
-			return
 		}
 
 		pages.PageMap[userID] = page
 
-		embed, components := embeds.LeaderboardEmbed(page, client.Users)
+		embed, components := embeds.ListUsersEmbed(page, client.BookstackUsers)
 		currentPage := page + 1
-		footerText := fmt.Sprintf("Page %d/%d", currentPage, (len(client.Users)+pages.PerPage-1)/pages.PerPage)
+		footerText := fmt.Sprintf("Page %d/%d", currentPage, (len(client.BookstackUsers)+pages.PerPage-1)/pages.PerPage)
 
 		embed.Footer = &discordgo.MessageEmbedFooter{Text: footerText}
 		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

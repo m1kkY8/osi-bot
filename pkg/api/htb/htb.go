@@ -10,7 +10,7 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func FetchUsers() ([]models.User, error) {
+func FetchUsers() ([]models.TeamMember, error) {
 	apiURL := "https://www.hackthebox.com/api/v4/team/members/6859"
 	req, _ := http.NewRequest("GET", apiURL, nil)
 	req.Header.Add("User-Agent", "curl/7.64.1")
@@ -30,7 +30,7 @@ func FetchUsers() ([]models.User, error) {
 		return nil, fmt.Errorf("failed to fetch users, status code: %d", resp.StatusCode)
 	}
 
-	var parsed []models.User
+	var parsed []models.TeamMember
 	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
 		return nil, err
 	}

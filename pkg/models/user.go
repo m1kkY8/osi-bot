@@ -1,6 +1,6 @@
 package models
 
-type User struct {
+type TeamMember struct {
 	Name     string `json:"name"`
 	RankText string `json:"rank_text"`
 	UserOwns int    `json:"user_owns"`
