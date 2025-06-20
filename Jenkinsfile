@@ -14,6 +14,9 @@ pipeline {
 
     stages {
         stage("Docker login and cache") {
+            when {
+                branch 'main'
+            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: DOCKERHUB_CREDS,
@@ -33,6 +36,9 @@ pipeline {
         }
 
         stage("Build docker image") {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     echo "Building Docker image with cache..."
@@ -49,6 +55,9 @@ pipeline {
         }
 
         stage("Push to registry") {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     echo "Pushing images to Docker Hub..."
