@@ -21,13 +21,17 @@ func main() {
 	}
 
 	client := models.NewClient(nil, dg)
-	pages := models.NewPage(1, 10, 0, make(map[string]int))
+	lbPages := models.NewPage(1, 10, 0, make(map[string]int))
+	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
 
 	client.DiscordSession.Identify.Intents = intents.SetIntents()
 
-	handlers.LeaderboardHandler(client, pages)
-	handlers.LeaderboardInteraction(client, pages)
+	handlers.LeaderboardHandler(client, lbPages)
+	handlers.LeaderboardInteraction(client, lbPages)
 	handlers.RegisterUser(client)
+	handlers.GetUsers(client, bookstackPages)
+	handlers.UserListInteraction(client, bookstackPages)
+	handlers.DeleteUser(client)
 
 	err = client.DiscordSession.Open()
 	if err != nil {

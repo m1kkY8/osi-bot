@@ -4,6 +4,7 @@ import "github.com/bwmarrin/discordgo"
 
 type Client struct {
 	Users          []User
+	BookstackUsers []BookstackUser
 	DiscordSession *discordgo.Session
 }
 
