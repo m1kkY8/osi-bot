@@ -15,5 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o
 RUN upx --best --lzma /bot
 
 FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bot /bot
+USER 1000
 ENTRYPOINT ["/bot"]
