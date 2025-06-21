@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
-	"github.com/m1kkY8/osi-bot/pkg/intents"
+	"github.com/m1kkY8/osi-bot/pkg/bot/intents"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 	_ "github.com/m1kkY8/osi-bot/pkg/util"
 )
@@ -25,7 +25,11 @@ func main() {
 	lbPages := models.NewPage(1, 10, 0, make(map[string]int))
 	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
 
+	// Set up intents and application commands
 	client.DiscordSession.Identify.Intents = intents.SetIntents()
+	client.ApplicationCommands = models.SetApplicationCommands()
+	client.SetGuildID(os.Getenv("GUILD_ID"))
+	client.SetAdminRoleID(os.Getenv("ADMIN_ROLE_ID"))
 
 	// Register interaction handlers (buttons etc)
 	interactions.UserListInteraction(client, bookstackPages)
@@ -33,16 +37,26 @@ func main() {
 
 	// Slash command handler map using factories; pass client/pages as needed
 	slashHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"alexandriaregister": commands.RegisterUserSlashHandler(client, "1356379340253958315"),
-		"removeuser":         commands.DeleteUserSlashHandler("1356379340253958315"),
-		"alexandriausers":    commands.BookUserSlashCommandHandler(client, bookstackPages),
-		"leaderboard":        commands.LeaderboardSlashHandler(client, lbPages),
+		"leaderboard": commands.LeaderboardSlashHandler(client, lbPages),
 	}
 
 	// Universal slash command dispatcher
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.Type == discordgo.InteractionApplicationCommand {
-			if handler, ok := slashHandlers[i.ApplicationCommandData().Name]; ok {
+			data := i.ApplicationCommandData()
+			if data.Name == "alexandria" {
+				// Handle Alexandria subcommands
+				sub := data.Options[0]
+				switch sub.Name {
+				case "register":
+					slashHandlers["register"] = commands.RegisterUserSlashHandler(client, client.GetAdminRoleID())
+				case "remove":
+					slashHandlers["remove"] = commands.DeleteUserSlashHandler(client.GetAdminRoleID())
+				case "users":
+					slashHandlers["users"] = commands.BookUserSlashCommandHandler(client, bookstackPages)
+				}
+			} else if handler, ok := slashHandlers[i.ApplicationCommandData().Name]; ok {
+				fmt.Printf("Received command: %s\n", i.ApplicationCommandData().Name)
 				handler(s, i)
 			}
 		}
@@ -56,48 +70,13 @@ func main() {
 	}
 
 	// Slash commands registration
-	applicationCommands := []*discordgo.ApplicationCommand{
-		{
-			Name:        "alexandriaregister",
-			Description: "Register a new BookStack user for a Discord user",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionUser,
-					Name:        "user",
-					Description: "The Discord user to register",
-					Required:    true,
-				},
-			},
-		},
-		{
-			Name:        "removeuser",
-			Description: "Delete a BookStack user by their user ID",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Name:        "user_id",
-					Description: "The BookStack user ID to delete",
-					Required:    true,
-				},
-			},
-		},
-		{
-			Name:        "alexandriausers",
-			Description: "Get a list of BookStack users",
-		},
-		{
-			Name:        "leaderboard",
-			Description: "Show the leaderboard",
-		},
-	}
-
-	for _, cmd := range applicationCommands {
+	for _, cmd := range client.ApplicationCommands {
 		_, err := client.DiscordSession.ApplicationCommandCreate(
 			client.DiscordSession.State.User.ID,
-			"1154887554965962932",
-			//			"1180277331189842021", // "" for global, or guild ID for quick updates
+			client.GetGuildID(),
 			cmd,
 		)
+		fmt.Printf("Registered command: %s\n", cmd.Name)
 		if err != nil {
 			fmt.Printf("Error creating command '%s': %v\n", cmd.Name, err)
 		}

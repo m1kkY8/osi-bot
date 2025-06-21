@@ -10,7 +10,7 @@ import (
 
 func DeleteUserSlashHandler(adminRoleID string) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "removeuser" {
+		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "remove" {
 			return
 		}
 

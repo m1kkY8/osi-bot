@@ -14,7 +14,7 @@ import (
 // Pass adminRoleID as string argument when registering the handler
 func RegisterUserSlashHandler(client *models.Client, adminRoleID string) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "alexandriaregister" {
+		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "register" {
 			return
 		}
 

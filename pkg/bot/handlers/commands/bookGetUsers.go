@@ -12,7 +12,7 @@ import (
 // Handler factory: returns a handler func for slash command
 func BookUserSlashCommandHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "alexandriausers" {
+		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "users" {
 			return
 		}
 
