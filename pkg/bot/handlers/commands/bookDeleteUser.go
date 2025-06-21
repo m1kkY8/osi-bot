@@ -10,10 +10,6 @@ import (
 
 func DeleteUserSlashHandler(adminRoleID string) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "remove" {
-			return
-		}
-
 		hasAdmin := slices.Contains(i.Member.Roles, adminRoleID)
 		if !hasAdmin {
 			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -26,16 +22,16 @@ func DeleteUserSlashHandler(adminRoleID string) func(s *discordgo.Session, i *di
 			return
 		}
 
-		// Get the user_id argument
 		options := i.ApplicationCommandData().Options
-		var userID int
-		for _, opt := range options {
-			if opt.Name == "user_id" && opt.Type == discordgo.ApplicationCommandOptionInteger {
-				userID = int(opt.IntValue())
+		var userID string
+		if len(options) > 0 && options[0].Name == "remove" && options[0].Type == discordgo.ApplicationCommandOptionSubCommand {
+			for _, opt := range options[0].Options {
+				if opt.Name == "user_id" && opt.Type == discordgo.ApplicationCommandOptionString {
+					userID = opt.StringValue()
+				}
 			}
 		}
-		if userID == 0 {
-			// Should not happen if Required: true, but safety check
+		if userID == "" {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -46,12 +42,12 @@ func DeleteUserSlashHandler(adminRoleID string) func(s *discordgo.Session, i *di
 			return
 		}
 
-		endpoints.BookApiDeleteUser(userID)
+		endpoints.BookApiDeleteUser(userID) // adjust type if needed
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("✅ Attempting to delete user with ID: %d", userID),
-				Flags:   discordgo.MessageFlagsEphemeral, // Use Flags: discordgo.MessageFlagsEphemeral for private response
+				Content: fmt.Sprintf("✅ Attempting to delete user with ID: %s", userID),
+				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
 	}

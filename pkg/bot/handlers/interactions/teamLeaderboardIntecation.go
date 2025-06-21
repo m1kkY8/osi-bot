@@ -10,10 +10,7 @@ import (
 
 func LeaderboardInteraction(client *models.Client, pages *models.Page) {
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		fmt.Println("got interaction")
-
 		if i.Type != discordgo.InteractionMessageComponent {
-			fmt.Println("not component")
 			return
 		}
 		fmt.Println(i.MessageComponentData().CustomID)

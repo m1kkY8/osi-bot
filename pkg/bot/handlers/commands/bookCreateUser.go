@@ -14,10 +14,6 @@ import (
 // Pass adminRoleID as string argument when registering the handler
 func RegisterUserSlashHandler(client *models.Client, adminRoleID string) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "register" {
-			return
-		}
-
 		// Check for admin role
 		hasAdmin := slices.Contains(i.Member.Roles, adminRoleID)
 		if !hasAdmin {
@@ -31,14 +27,17 @@ func RegisterUserSlashHandler(client *models.Client, adminRoleID string) func(s 
 			return
 		}
 
-		// Get the user parameter (slash command option)
+		options := i.ApplicationCommandData().Options
 		var targetUser *discordgo.User
-		for _, opt := range i.ApplicationCommandData().Options {
-			if opt.Name == "user" && opt.Type == discordgo.ApplicationCommandOptionUser {
-				targetUser = opt.UserValue(s)
-				break
+		if len(options) > 0 && options[0].Name == "register" && options[0].Type == discordgo.ApplicationCommandOptionSubCommand {
+			for _, opt := range options[0].Options {
+				if opt.Name == "username" && opt.Type == discordgo.ApplicationCommandOptionUser {
+					targetUser = opt.UserValue(s)
+					break
+				}
 			}
 		}
+
 		if targetUser == nil {
 			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,

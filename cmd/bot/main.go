@@ -42,23 +42,36 @@ func main() {
 
 	// Universal slash command dispatcher
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type == discordgo.InteractionApplicationCommand {
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
 			data := i.ApplicationCommandData()
-			if data.Name == "alexandria" {
-				// Handle Alexandria subcommands
+			if data.Name == "alexandria" && len(data.Options) > 0 {
 				sub := data.Options[0]
+				var handler func(*discordgo.Session, *discordgo.InteractionCreate)
 				switch sub.Name {
 				case "register":
-					slashHandlers["register"] = commands.RegisterUserSlashHandler(client, client.GetAdminRoleID())
+					fmt.Printf("[LOG] /alexandria register called by %s\n", i.Member.User.Username)
+					handler = commands.RegisterUserSlashHandler(client, client.GetAdminRoleID())
 				case "remove":
-					slashHandlers["remove"] = commands.DeleteUserSlashHandler(client.GetAdminRoleID())
+					fmt.Printf("[LOG] /alexandria remove called by %s\n", i.Member.User.Username)
+					handler = commands.DeleteUserSlashHandler(client.GetAdminRoleID())
 				case "users":
-					slashHandlers["users"] = commands.BookUserSlashCommandHandler(client, bookstackPages)
+					fmt.Printf("[LOG] /alexandria users called by %s\n", i.Member.User.Username)
+					handler = commands.BookUserSlashCommandHandler(client, bookstackPages)
+				default:
+					fmt.Printf("[LOG] /alexandria unknown subcommand: %s by %s\n", sub.Name, i.Member.User.Username)
 				}
-			} else if handler, ok := slashHandlers[i.ApplicationCommandData().Name]; ok {
-				fmt.Printf("Received command: %s\n", i.ApplicationCommandData().Name)
+				if handler != nil {
+					handler(s, i)
+				}
+			} else if handler, ok := slashHandlers[data.Name]; ok {
+				fmt.Printf("[LOG] /%s called by %s\n", data.Name, i.Member.User.Username)
 				handler(s, i)
+			} else {
+				fmt.Printf("[LOG] Unknown command: %s by %s\n", data.Name, i.Member.User.Username)
 			}
+		case discordgo.InteractionMessageComponent:
+			fmt.Printf("[LOG] Component interaction: %s by %s\n", i.MessageComponentData().CustomID, i.Member.User.Username)
 		}
 	})
 

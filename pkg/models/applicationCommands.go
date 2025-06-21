@@ -15,7 +15,7 @@ func SetApplicationCommands() []*discordgo.ApplicationCommand {
 					Description: "Register a user in Alexandria",
 					Options: []*discordgo.ApplicationCommandOption{
 						{
-							Type:        discordgo.ApplicationCommandOptionString,
+							Type:        discordgo.ApplicationCommandOptionUser,
 							Name:        "username",
 							Description: "The username to register",
 							Required:    true,

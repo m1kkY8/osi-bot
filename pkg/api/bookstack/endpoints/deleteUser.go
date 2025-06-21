@@ -9,8 +9,8 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func BookApiDeleteUser(id int) {
-	url := fmt.Sprintf("%s/api/users/%d", models.BOOKSTACK_DOMAIN, id)
+func BookApiDeleteUser(id string) {
+	url := fmt.Sprintf("%s/api/users/%s", models.BOOKSTACK_DOMAIN, id)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create request:", err)
@@ -34,5 +34,5 @@ func BookApiDeleteUser(id int) {
 		return
 	}
 
-	fmt.Println(rawBody)
+	fmt.Println(string(rawBody))
 }
