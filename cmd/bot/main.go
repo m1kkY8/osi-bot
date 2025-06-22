@@ -10,7 +10,6 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
 	"github.com/m1kkY8/osi-bot/pkg/bot/intents"
 	"github.com/m1kkY8/osi-bot/pkg/models"
-	_ "github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 func main() {
@@ -45,16 +44,45 @@ func main() {
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			data := i.ApplicationCommandData()
-			if data.Name == "alexandria" && len(data.Options) > 0 {
+			if data.Name == "team" && len(data.Options) > 0 {
+				sub := data.Options[0]
+				var handler func(*discordgo.Session, *discordgo.InteractionCreate)
+				switch sub.Name {
+				case "getrequests":
+					fmt.Printf("[LOG] /team getrequests called by %s\n", i.Member.User.Username)
+					handler = commands.TeamGetRequestsSlashHandler(client)
+				case "accept":
+					fmt.Printf("[LOG] /team accept called by %s\n", i.Member.User.Username)
+					handler = commands.TeamAcceptSlashHandler(client)
+				case "reject":
+					fmt.Printf("[LOG] /team reject called by %s\n", i.Member.User.Username)
+					handler = commands.TeamRejectSlashHandler(client)
+				case "kick":
+					fmt.Printf("[LOG] /team kick called by %s\n", i.Member.User.Username)
+					handler = commands.TeamKickSlashHandler(client)
+				default:
+					fmt.Printf("[LOG] /team unknown subcommand: %s by %s\n", sub.Name, i.Member.User.Username)
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: fmt.Sprintf("Unknown subcommand: %s", sub.Name),
+							Flags:   discordgo.MessageFlagsEphemeral,
+						},
+					})
+				}
+				if handler != nil {
+					handler(s, i)
+				}
+			} else if data.Name == "alexandria" && len(data.Options) > 0 {
 				sub := data.Options[0]
 				var handler func(*discordgo.Session, *discordgo.InteractionCreate)
 				switch sub.Name {
 				case "register":
 					fmt.Printf("[LOG] /alexandria register called by %s\n", i.Member.User.Username)
-					handler = commands.RegisterUserSlashHandler(client, client.GetAdminRoleID())
+					handler = commands.RegisterUserSlashHandler(client)
 				case "remove":
 					fmt.Printf("[LOG] /alexandria remove called by %s\n", i.Member.User.Username)
-					handler = commands.DeleteUserSlashHandler(client.GetAdminRoleID())
+					handler = commands.DeleteUserSlashHandler(client)
 				case "users":
 					fmt.Printf("[LOG] /alexandria users called by %s\n", i.Member.User.Username)
 					handler = commands.BookUserSlashCommandHandler(client, bookstackPages)

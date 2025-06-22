@@ -11,8 +11,8 @@ import (
 )
 
 func FetchUsers() ([]models.TeamMember, error) {
-	apiURL := "https://www.hackthebox.com/api/v4/team/members/6859"
-	req, _ := http.NewRequest("GET", apiURL, nil)
+	url := fmt.Sprintf("%s/team/members/%s", BaseURL, TeamID)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("User-Agent", "curl/7.64.1")
 	req.Header.Add("Authorization", "Bearer "+os.Getenv("HTB_TOKEN"))
 

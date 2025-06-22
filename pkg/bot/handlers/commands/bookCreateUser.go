@@ -12,10 +12,10 @@ import (
 )
 
 // Pass adminRoleID as string argument when registering the handler
-func RegisterUserSlashHandler(client *models.Client, adminRoleID string) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func RegisterUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// Check for admin role
-		hasAdmin := slices.Contains(i.Member.Roles, adminRoleID)
+		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
 			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,

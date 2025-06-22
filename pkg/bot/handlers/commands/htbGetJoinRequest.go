@@ -5,11 +5,11 @@ import (
 	"slices"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
+	"github.com/m1kkY8/osi-bot/pkg/api/htb"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func DeleteUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func TeamGetRequestsSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
@@ -22,32 +22,35 @@ func DeleteUserSlashHandler(client *models.Client) func(s *discordgo.Session, i 
 			})
 			return
 		}
-
-		options := i.ApplicationCommandData().Options
-		var userID string
-		if len(options) > 0 && options[0].Name == "remove" && options[0].Type == discordgo.ApplicationCommandOptionSubCommand {
-			for _, opt := range options[0].Options {
-				if opt.Name == "user_id" && opt.Type == discordgo.ApplicationCommandOptionString {
-					userID = opt.StringValue()
-				}
-			}
-		}
-		if userID == "" {
+		joinReqs, err := htb.GetJoinRequests()
+		if err != nil {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You must provide a valid user ID.",
+					Content: fmt.Sprintf("Failed to retrieve join requests: %v", err),
 					Flags:   discordgo.MessageFlagsEphemeral,
 				},
 			})
 			return
 		}
-
-		endpoints.BookApiDeleteUser(userID) // adjust type if needed
+		if len(joinReqs) == 0 {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "No join requests found.",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+			return
+		}
+		content := fmt.Sprintf("Total join requests: %d\n", len(joinReqs))
+		for _, req := range joinReqs {
+			content += fmt.Sprintf("- Username: %s, User ID: %d, Request ID: %d\n", req.User.Name, req.User.ID, req.ID)
+		}
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("✅ Attempting to delete user with ID: %s", userID),
+				Content: content,
 				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
