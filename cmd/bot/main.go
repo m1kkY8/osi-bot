@@ -35,9 +35,7 @@ func main() {
 	interactions.LeaderboardInteraction(client, lbPages)
 
 	// Slash command handler map using factories; pass client/pages as needed
-	slashHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"leaderboard": commands.LeaderboardSlashHandler(client, lbPages),
-	}
+	slashHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
 
 	// Universal slash command dispatcher
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -60,6 +58,9 @@ func main() {
 				case "kick":
 					fmt.Printf("[LOG] /team kick called by %s\n", i.Member.User.Username)
 					handler = commands.TeamKickSlashHandler(client)
+				case "leaderboard":
+					fmt.Printf("[LOG] /team leaderboard called by %s\n", i.Member.User.Username)
+					handler = commands.TeamLeaderboardSlashHandler(client, lbPages)
 				default:
 					fmt.Printf("[LOG] /team unknown subcommand: %s by %s\n", sub.Name, i.Member.User.Username)
 					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

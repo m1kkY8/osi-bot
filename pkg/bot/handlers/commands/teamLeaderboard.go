@@ -9,11 +9,8 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func LeaderboardSlashHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func TeamLeaderboardSlashHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if i.Type != discordgo.InteractionApplicationCommand || i.ApplicationCommandData().Name != "leaderboard" {
-			return
-		}
 		var err error
 
 		client.TeamMembers, err = htb.FetchUsers()

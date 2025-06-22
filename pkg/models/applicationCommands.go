@@ -90,11 +90,12 @@ func SetApplicationCommands() []*discordgo.ApplicationCommand {
 						},
 					},
 				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "leaderboard",
+					Description: "Show the leaderboard",
+				},
 			},
-		},
-		{
-			Name:        "leaderboard",
-			Description: "Show the leaderboard",
 		},
 	}
 }
