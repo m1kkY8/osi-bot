@@ -4,7 +4,7 @@ import "os"
 
 var (
 	BaseURL = "https://labs.hackthebox.com/api/v4"
-	TeamID  = "7185"
+	TeamID  = os.Getenv("HTB_TEAM_ID")
 )
 
 // Structs for API responses
