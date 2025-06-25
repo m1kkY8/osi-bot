@@ -10,8 +10,9 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func FetchUsers() ([]models.TeamMember, error) {
-	url := fmt.Sprintf("%s/team/members/%s", BaseURL, TeamID)
+func FetchUsers(teamID string) ([]models.TeamMember, error) {
+	url := fmt.Sprintf("%s/team/members/%s", BaseURL, teamID)
+	fmt.Println(url)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("User-Agent", "curl/7.64.1")
 	req.Header.Add("Authorization", "Bearer "+os.Getenv("HTB_TOKEN"))

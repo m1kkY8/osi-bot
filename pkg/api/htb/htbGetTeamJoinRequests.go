@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func GetJoinRequests() ([]JoinRequest, error) {
-	url := fmt.Sprintf("%s/team/invitations/%s", BaseURL, TeamID)
+func GetJoinRequests(teamID string) ([]JoinRequest, error) {
+	url := fmt.Sprintf("%s/team/invitations/%s", BaseURL, teamID)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+getHTBToken())
 	req.Header.Set("User-Agent", "curl/7.68.0")

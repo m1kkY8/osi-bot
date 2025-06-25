@@ -7,19 +7,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/htb"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
-func TeamAcceptSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func teamAcceptSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You do not have permission to use this command.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "❌ You do not have permission to use this command.")
 			return
 		}
 		sub := i.ApplicationCommandData().Options[0]
@@ -30,32 +25,14 @@ func TeamAcceptSlashHandler(client *models.Client) func(s *discordgo.Session, i 
 			}
 		}
 		if requestID == "" {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Missing request ID.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "Missing request ID.")
 			return
 		}
 		err := htb.HTBAcceptJoin(requestID)
 		if err == nil {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("✅ Successfully accepted invite for request ID %s", requestID),
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("✅ Successfully accepted invite for request ID %s", requestID))
 		} else {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("❌ Failed to accept invite for request ID %s: %v", requestID, err),
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to accept invite for request ID %s: %v", requestID, err))
 		}
 	}
 }

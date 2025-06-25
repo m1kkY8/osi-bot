@@ -8,20 +8,16 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
 	"github.com/m1kkY8/osi-bot/pkg/bot/embeds"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 // Handler factory: returns a handler func for slash command
-func BookUserSlashCommandHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func bookUserSlashCommandHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You do not have permission to use this command.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+
+			util.RespondEphemeral(s, i.Interaction, "❌ You do not have permission to use this command.")
 			return
 		}
 		client.BookstackUsers = endpoints.BookApiListUsers()

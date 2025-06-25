@@ -9,12 +9,12 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
-func BookApiDeleteUser(id string) {
+func BookApiDeleteUser(id string) error {
 	url := fmt.Sprintf("%s/api/users/%s", models.BOOKSTACK_DOMAIN, id)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create request:", err)
-		return
+		return err
 	}
 
 	for key, value := range auth.GetAuthHeader() {
@@ -24,15 +24,26 @@ func BookApiDeleteUser(id string) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to fetch users:", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		fmt.Println("[ERROR] User not found")
+		return fmt.Errorf("user with ID %s not found", id)
+	}
+
+	if resp.StatusCode == 500 {
+		fmt.Println("[ERROR] Internal server error")
+		return fmt.Errorf("internal server error while deleting user with ID %s", id)
+	}
 
 	rawBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to read response body:", err)
-		return
+		return err
 	}
 
 	fmt.Println(string(rawBody))
+	return nil
 }

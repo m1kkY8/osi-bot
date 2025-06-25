@@ -7,19 +7,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
-func DeleteUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func deleteUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You do not have permission to use this command.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "❌ You do not have permission to use this command.")
 			return
 		}
 
@@ -33,23 +28,15 @@ func DeleteUserSlashHandler(client *models.Client) func(s *discordgo.Session, i 
 			}
 		}
 		if userID == "" {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You must provide a valid user ID.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "❌ You must provide a valid user ID.")
 			return
 		}
 
 		endpoints.BookApiDeleteUser(userID) // adjust type if needed
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("✅ Attempting to delete user with ID: %s", userID),
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
+		if err := endpoints.BookApiDeleteUser(userID); err != nil {
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to delete user with ID: %s. Error: %s", userID, err.Error()))
+			return
+		}
+		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("✅ Deleted user with ID: %s", userID))
 	}
 }

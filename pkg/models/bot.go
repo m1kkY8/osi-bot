@@ -1,6 +1,8 @@
 package models
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+)
 
 type Client struct {
 	TeamMembers         []TeamMember
@@ -10,6 +12,7 @@ type Client struct {
 	intents             []discordgo.Intent // Intents for the Discord session
 	guildID             string             // empty for global, set for guild-specific commands
 	adminRoleID         string             // Role ID for admin users, if needed
+	teamID              string
 }
 
 func NewClient(teamMembers []TeamMember, discordSession *discordgo.Session) *Client {
@@ -29,6 +32,14 @@ func (c *Client) SetGuildID(guildID string) {
 
 func (c *Client) GetGuildID() string {
 	return c.guildID
+}
+
+func (c *Client) SetTeamID(teamID string) {
+	c.teamID = teamID
+}
+
+func (c *Client) GetTeamID() string {
+	return c.teamID
 }
 
 func (c *Client) SetAdminRoleID(roleID string) {

@@ -9,21 +9,16 @@ import (
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 // Pass adminRoleID as string argument when registering the handler
-func RegisterUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func registerUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// Check for admin role
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You do not have permission to use this command.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "❌ You do not have permission to use this command.")
 			return
 		}
 
@@ -39,13 +34,7 @@ func RegisterUserSlashHandler(client *models.Client) func(s *discordgo.Session, 
 		}
 
 		if targetUser == nil {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ Could not find the specified user.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "❌ Could not find the specified user.")
 			return
 		}
 
@@ -88,12 +77,6 @@ func RegisterUserSlashHandler(client *models.Client) func(s *discordgo.Session, 
 		} else {
 			response = fmt.Sprintf("Failed to register user: %s", dmMessage)
 		}
-		_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: response,
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
+		util.RespondEphemeral(s, i.Interaction, response)
 	}
 }

@@ -7,19 +7,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/htb"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
-func TeamKickSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func teamKickSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {
-			_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "❌ You do not have permission to use this command.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			_ = util.RespondEphemeral(s, i.Interaction, "❌ You do not have permission to use this command.")
 			return
 		}
 		sub := i.ApplicationCommandData().Options[0]
@@ -30,32 +25,14 @@ func TeamKickSlashHandler(client *models.Client) func(s *discordgo.Session, i *d
 			}
 		}
 		if userID == "" {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Missing user ID.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "Missing user ID.")
 			return
 		}
 		err := htb.HTBKickUser(userID)
 		if err == nil {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("✅ Kicked user ID %s from the team", userID),
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, "✅ Kicked user ID %s from the team.")
 		} else {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("❌ Failed to kick user ID %s: %v", userID, err),
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to kick user ID %s: %v", userID, err))
 		}
 	}
 }

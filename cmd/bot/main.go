@@ -29,6 +29,7 @@ func main() {
 	client.ApplicationCommands = models.SetApplicationCommands()
 	client.SetGuildID(os.Getenv("GUILD_ID"))
 	client.SetAdminRoleID(os.Getenv("ADMIN_ROLE_ID"))
+	client.SetTeamID(os.Getenv("HTB_TEAM_ID"))
 
 	// Register interaction handlers (buttons etc)
 	interactions.UserListInteraction(client, bookstackPages)
@@ -39,61 +40,11 @@ func main() {
 
 	// Universal slash command dispatcher
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		commands.HandleSlashCommand(client, lbPages, bookstackPages, s, i)
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
 			data := i.ApplicationCommandData()
-			if data.Name == "team" && len(data.Options) > 0 {
-				sub := data.Options[0]
-				var handler func(*discordgo.Session, *discordgo.InteractionCreate)
-				switch sub.Name {
-				case "getrequests":
-					fmt.Printf("[LOG] /team getrequests called by %s\n", i.Member.User.Username)
-					handler = commands.TeamGetRequestsSlashHandler(client)
-				case "accept":
-					fmt.Printf("[LOG] /team accept called by %s\n", i.Member.User.Username)
-					handler = commands.TeamAcceptSlashHandler(client)
-				case "reject":
-					fmt.Printf("[LOG] /team reject called by %s\n", i.Member.User.Username)
-					handler = commands.TeamRejectSlashHandler(client)
-				case "kick":
-					fmt.Printf("[LOG] /team kick called by %s\n", i.Member.User.Username)
-					handler = commands.TeamKickSlashHandler(client)
-				case "leaderboard":
-					fmt.Printf("[LOG] /team leaderboard called by %s\n", i.Member.User.Username)
-					handler = commands.TeamLeaderboardSlashHandler(client, lbPages)
-				default:
-					fmt.Printf("[LOG] /team unknown subcommand: %s by %s\n", sub.Name, i.Member.User.Username)
-					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Content: fmt.Sprintf("Unknown subcommand: %s", sub.Name),
-							Flags:   discordgo.MessageFlagsEphemeral,
-						},
-					})
-				}
-				if handler != nil {
-					handler(s, i)
-				}
-			} else if data.Name == "alexandria" && len(data.Options) > 0 {
-				sub := data.Options[0]
-				var handler func(*discordgo.Session, *discordgo.InteractionCreate)
-				switch sub.Name {
-				case "register":
-					fmt.Printf("[LOG] /alexandria register called by %s\n", i.Member.User.Username)
-					handler = commands.RegisterUserSlashHandler(client)
-				case "remove":
-					fmt.Printf("[LOG] /alexandria remove called by %s\n", i.Member.User.Username)
-					handler = commands.DeleteUserSlashHandler(client)
-				case "users":
-					fmt.Printf("[LOG] /alexandria users called by %s\n", i.Member.User.Username)
-					handler = commands.BookUserSlashCommandHandler(client, bookstackPages)
-				default:
-					fmt.Printf("[LOG] /alexandria unknown subcommand: %s by %s\n", sub.Name, i.Member.User.Username)
-				}
-				if handler != nil {
-					handler(s, i)
-				}
-			} else if handler, ok := slashHandlers[data.Name]; ok {
+			if handler, ok := slashHandlers[data.Name]; ok {
 				fmt.Printf("[LOG] /%s called by %s\n", data.Name, i.Member.User.Username)
 				handler(s, i)
 			} else {
