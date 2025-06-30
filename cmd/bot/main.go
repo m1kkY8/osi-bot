@@ -3,81 +3,78 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
-	"github.com/m1kkY8/osi-bot/pkg/bot/intents"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
 
 func main() {
-	godotenv.Load()
-	dg, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
-	if err != nil {
-		fmt.Println("Error creating Discord session:", err)
+	// Load environment variables
+	_ = godotenv.Load()
+	discordToken := os.Getenv("DISCORD_TOKEN")
+	if discordToken == "" {
+		fmt.Println("DISCORD_TOKEN not set")
 		return
 	}
 
+	// Create Discord session
+	dg, err := discordgo.New("Bot " + discordToken)
+	if err != nil {
+		fmt.Printf("Error creating Discord session: %v\n", err)
+		return
+	}
+
+	// Initialize stateful client and pagers
 	client := models.NewClient(nil, dg)
 	lbPages := models.NewPage(1, 10, 0, make(map[string]int))
 	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
 
-	// Set up intents and application commands
-	client.DiscordSession.Identify.Intents = intents.SetIntents()
-	client.ApplicationCommands = models.SetApplicationCommands()
-	client.SetGuildID(os.Getenv("GUILD_ID"))
-	client.SetAdminRoleID(os.Getenv("ADMIN_ROLE_ID"))
-	client.SetTeamID(os.Getenv("HTB_TEAM_ID"))
+	// Initialize client state (intents, commands, config)
+	client.Initialize()
 
-	// Register interaction handlers (buttons etc)
-	interactions.UserListInteraction(client, bookstackPages)
-	interactions.LeaderboardInteraction(client, lbPages)
+	// Register custom interaction handlers (components, buttons, etc.)
+	interactions.RegisterInteractionHandlers(client, lbPages, bookstackPages)
 
-	// Slash command handler map using factories; pass client/pages as needed
-	slashHandlers := map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){}
+	// Register universal interaction dispatcher
+	registerUniversalDispatcher(client, lbPages, bookstackPages)
 
-	// Universal slash command dispatcher
-	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		commands.HandleSlashCommand(client, lbPages, bookstackPages, s, i)
-		switch i.Type {
-		case discordgo.InteractionApplicationCommand:
-			data := i.ApplicationCommandData()
-			if handler, ok := slashHandlers[data.Name]; ok {
-				fmt.Printf("[LOG] /%s called by %s\n", data.Name, i.Member.User.Username)
-				handler(s, i)
-			} else {
-				fmt.Printf("[LOG] Unknown command: %s by %s\n", data.Name, i.Member.User.Username)
-			}
-		case discordgo.InteractionMessageComponent:
-			fmt.Printf("[LOG] Component interaction: %s by %s\n", i.MessageComponentData().CustomID, i.Member.User.Username)
-		}
-	})
-
-	// Open the Discord session
-	err = client.DiscordSession.Open()
-	if err != nil {
-		fmt.Println("Error opening Discord session:", err)
+	// Open Discord session
+	if err := client.DiscordSession.Open(); err != nil {
+		fmt.Printf("Error opening Discord session: %v\n", err)
 		return
 	}
 
-	// Slash commands registration
-	for _, cmd := range client.ApplicationCommands {
-		_, err := client.DiscordSession.ApplicationCommandCreate(
-			client.DiscordSession.State.User.ID,
-			client.GetGuildID(),
-			cmd,
-		)
-		fmt.Printf("Registered command: %s\n", cmd.Name)
-		if err != nil {
-			fmt.Printf("Error creating command '%s': %v\n", cmd.Name, err)
-		}
-	}
-
-	// deleted, err := util.ClearSlashCommands(client.DiscordSession, "1154887554965962932")
-	// fmt.Printf("Deleted %d commands\n", deleted)
+	// Register slash commands
+	client.RegisterSlashCommands()
 
 	fmt.Println("Bot is now running. Press CTRL+C to exit.")
-	select {}
+
+	// Wait for graceful shutdown
+	waitForInterrupt()
+}
+
+// registerUniversalDispatcher wires up the main dispatcher for slash and component interactions.
+func registerUniversalDispatcher(client *models.Client, lbPages, bookstackPages *models.Page) {
+	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			commands.HandleSlashCommand(client, lbPages, bookstackPages, s, i)
+		case discordgo.InteractionMessageComponent:
+			fmt.Printf("[LOG] Component interaction: %s by %s\n", i.MessageComponentData().CustomID, i.Member.User.Username)
+			// Actual handling occurs in RegisterInteractionHandlers
+		}
+	})
+}
+
+// waitForInterrupt blocks until CTRL+C or termination signal is received.
+func waitForInterrupt() {
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+	fmt.Println("Shutting down gracefully...")
 }

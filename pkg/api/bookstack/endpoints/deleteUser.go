@@ -29,8 +29,8 @@ func BookApiDeleteUser(id string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		fmt.Println("[ERROR] User not found")
-		return fmt.Errorf("user with ID %s not found", id)
+		fmt.Println("[INFO] User not found or already deleted")
+		return nil // treat as success
 	}
 
 	if resp.StatusCode == 500 {

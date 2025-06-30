@@ -1,7 +1,11 @@
 package models
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/bwmarrin/discordgo"
+	"github.com/m1kkY8/osi-bot/pkg/bot/intents"
 )
 
 type Client struct {
@@ -23,6 +27,29 @@ func NewClient(teamMembers []TeamMember, discordSession *discordgo.Session) *Cli
 		ApplicationCommands: []*discordgo.ApplicationCommand{},
 		intents:             []discordgo.Intent{}, // Default to no intents
 		guildID:             "",                   // Default to global commands
+	}
+}
+
+func (c *Client) Initialize() {
+	c.DiscordSession.Identify.Intents = intents.SetIntents()
+	c.ApplicationCommands = setApplicationCommands()
+	c.SetGuildID(os.Getenv("GUILD_ID"))
+	c.SetAdminRoleID(os.Getenv("ADMIN_ROLE_ID"))
+	c.SetTeamID(os.Getenv("HTB_TEAM_ID"))
+}
+
+func (c *Client) RegisterSlashCommands() {
+	for _, cmd := range c.ApplicationCommands {
+		_, err := c.DiscordSession.ApplicationCommandCreate(
+			c.DiscordSession.State.User.ID,
+			c.GetGuildID(),
+			cmd,
+		)
+		if err != nil {
+			fmt.Printf("Error creating command '%s': %v\n", cmd.Name, err)
+		} else {
+			fmt.Printf("Registered command: %s\n", cmd.Name)
+		}
 	}
 }
 
