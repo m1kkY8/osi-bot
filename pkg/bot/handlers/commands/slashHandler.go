@@ -73,6 +73,8 @@ func handleAlexandriaCommands(client *models.Client, bookstackPages *models.Page
 		handler = deleteUserSlashHandler(client)
 	case "users":
 		handler = bookUserSlashCommandHandler(client, bookstackPages)
+	case "update":
+		handler = updateUserSlashHandler(client)
 	default:
 		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("Unknown subcommand: %s", sub.Name))
 	}
