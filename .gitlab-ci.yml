@@ -43,4 +43,4 @@ publish:
     - if: '$CI_COMMIT_BRANCH == "main"'
   variables:
     DOCKER_USERNAME: "m1kky8"
-    DOCKER_PASSWORD: "$DOCKERHUB_CREDS" # Set this in GitLab CI/CD variables
+    DOCKER_PASSWORD: "$DOCKER_PASS" # Set this in GitLab CI/CD variables
