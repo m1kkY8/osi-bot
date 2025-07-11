@@ -19,10 +19,10 @@ build:
     - docker:dind
   script:
     - echo "Pulling cached images (if they exist)..."
-      - docker pull "$IMAGE_TAG" || true
-      - docker pull "$LATEST_TAG" || true
-      - echo "Building Docker image with cache..."
-      - >
+    - docker pull "$IMAGE_TAG" || true
+    - docker pull "$LATEST_TAG" || true
+    - echo "Building Docker image with cache..."
+    - >
       docker build
       --cache-from="$IMAGE_TAG"
       --cache-from="$LATEST_TAG"
@@ -35,12 +35,12 @@ publish:
     - docker:dind
   script:
     # Set DockerHub credentials in GitLab CI/CD settings as protected variables
-    - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker push "$IMAGE_TAG"
     - docker push "$LATEST_TAG"
-  needs: [build-image]
+  needs: [build]
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   variables:
-    DOCKER_USERNAME: "m1kky8" # Your DockerHub username
-    DOCKER_PASSWORD: "$DOCKERHUB_CREDS" # Store your password/token as CI variable
+    DOCKER_USERNAME: "m1kky8"
+    DOCKER_PASSWORD: "$DOCKERHUB_CREDS" # Set this in GitLab CI/CD variables
