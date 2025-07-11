@@ -13,6 +13,9 @@ default:
   tags:
     - sloboda
 
+before_script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
 build:
   stage: build
   services:
@@ -28,17 +31,8 @@ build:
       --cache-from="$LATEST_TAG"
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t "$IMAGE_TAG" -t "$LATEST_TAG" .
-
-publish:
-  stage: publish
-  services:
-    - docker:dind
-  script:
-    # Set DockerHub credentials in GitLab CI/CD settings as protected variables
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     - docker push "$IMAGE_TAG"
     - docker push "$LATEST_TAG"
-  needs: [build]
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   variables:
