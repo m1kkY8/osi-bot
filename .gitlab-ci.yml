@@ -1,12 +1,46 @@
 stages:
-  - test
+  - build
+  - publish
 
-test-runner:
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_IMAGE: "m1kky8/osi-bot"
+  IMAGE_TAG: "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA"
+  LATEST_TAG: "$DOCKER_IMAGE:latest"
+
+default:
+  image: docker:latest
   tags:
     - sloboda
-  stage: test
-  image: alpine:latest
+
+build:
+  stage: build
+  services:
+    - docker:dind
   script:
-    - echo "Runner is working!"
-    - uname -a
-    - cat /etc/os-release
+    - echo "Pulling cached images (if they exist)..."
+      - docker pull "$IMAGE_TAG" || true
+      - docker pull "$LATEST_TAG" || true
+      - echo "Building Docker image with cache..."
+      - >
+      docker build
+      --cache-from="$IMAGE_TAG"
+      --cache-from="$LATEST_TAG"
+      --build-arg BUILDKIT_INLINE_CACHE=1
+      -t "$IMAGE_TAG" -t "$LATEST_TAG" .
+
+push-image:
+  stage: publish
+  services:
+    - docker:dind
+  script:
+    # Set DockerHub credentials in GitLab CI/CD settings as protected variables
+    - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker push "$IMAGE_TAG"
+    - docker push "$LATEST_TAG"
+  needs: [build-image]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  variables:
+    DOCKER_USERNAME: "m1kky8" # Your DockerHub username
+    DOCKER_PASSWORD: "$DOCKERHUB_CREDS" # Store your password/token as CI variable
