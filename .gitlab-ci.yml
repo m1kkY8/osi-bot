@@ -1,0 +1,12 @@
+stages:
+  - test
+
+test-runner:
+  tags:
+    - sloboda
+  stage: test
+  image: alpine:latest
+  script:
+    - echo "Runner is working!"
+    - uname -a
+    - cat /etc/os-release
