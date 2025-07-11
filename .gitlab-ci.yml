@@ -35,7 +35,7 @@ build:
     - docker push "$LATEST_TAG"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: "$CI_PIPELINE_SOURCE == merge_request_event"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   variables:
     DOCKER_USERNAME: "m1kky8"
     DOCKER_PASSWORD: "$DOCKER_PASS"
