@@ -29,7 +29,7 @@ build:
       --build-arg BUILDKIT_INLINE_CACHE=1
       -t "$IMAGE_TAG" -t "$LATEST_TAG" .
 
-push-image:
+publish:
   stage: publish
   services:
     - docker:dind
