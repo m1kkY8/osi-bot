@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/gubarz/gohtb"
 	"github.com/joho/godotenv"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
@@ -22,6 +24,15 @@ func main() {
 		return
 	}
 
+	htbToken := os.Getenv("HTB_TOKEN")
+	if discordToken == "" {
+		fmt.Println("HTB_TOKEN not set")
+		return
+	}
+
+	ctx := context.Background()
+	htbClient, _ := gohtb.New(htbToken)
+
 	// Create Discord session
 	dg, err := discordgo.New("Bot " + discordToken)
 	if err != nil {
@@ -35,6 +46,9 @@ func main() {
 	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
 
 	// Initialize client state (intents, commands, config)
+	client.HTBClient = *htbClient
+	client.Context = ctx
+
 	client.Initialize()
 
 	// Register custom interaction handlers (components, buttons, etc.)

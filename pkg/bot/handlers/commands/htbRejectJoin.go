@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/api/htb"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
@@ -18,21 +17,21 @@ func teamRejectSlashHandler(client *models.Client) func(s *discordgo.Session, i 
 			return
 		}
 		sub := i.ApplicationCommandData().Options[0]
-		var requestID string
+		var requestID int
 		for _, opt := range sub.Options {
 			if opt.Name == "request_id" {
-				requestID = opt.StringValue()
+				requestID = int(opt.IntValue())
 			}
 		}
-		if requestID == "" {
+		if requestID == 0 {
 			util.RespondEphemeral(s, i.Interaction, "Missing request ID.")
 			return
 		}
-		err := htb.HTBAcceptJoin(requestID)
+		_, err := client.HTBClient.Teams.RejectInvite(client.Context, requestID)
 		if err == nil {
-			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("✅ Successfully rejected invite for request ID %s", requestID))
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("✅ Successfully rejected invite for request ID %d", requestID))
 		} else {
-			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to reject invite for request ID %s: %v", requestID, err))
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to reject invite for request ID %d: %v", requestID, err))
 		}
 	}
 }

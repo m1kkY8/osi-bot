@@ -37,7 +37,7 @@ func handleTeamCommands(client *models.Client, lbPages *models.Page, s *discordg
 
 	var handler func(*discordgo.Session, *discordgo.InteractionCreate)
 	switch sub.Name {
-	case "getrequests":
+	case "invitations":
 		handler = teamGetRequestsSlashHandler(client)
 	case "accept":
 		handler = teamAcceptSlashHandler(client)

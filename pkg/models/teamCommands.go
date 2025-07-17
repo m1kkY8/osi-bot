@@ -10,7 +10,7 @@ func getTeamCommands() []*discordgo.ApplicationCommand {
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
-					Name:        "getrequests",
+					Name:        "invitations",
 					Description: "Get all join requests",
 				},
 				{
@@ -19,7 +19,7 @@ func getTeamCommands() []*discordgo.ApplicationCommand {
 					Description: "Accept a join request",
 					Options: []*discordgo.ApplicationCommandOption{
 						{
-							Type:        discordgo.ApplicationCommandOptionString,
+							Type:        discordgo.ApplicationCommandOptionInteger,
 							Name:        "request_id",
 							Description: "Request ID to accept",
 							Required:    true,
@@ -32,7 +32,7 @@ func getTeamCommands() []*discordgo.ApplicationCommand {
 					Description: "Reject a join request",
 					Options: []*discordgo.ApplicationCommandOption{
 						{
-							Type:        discordgo.ApplicationCommandOptionString,
+							Type:        discordgo.ApplicationCommandOptionInteger,
 							Name:        "request_id",
 							Description: "Request ID to reject",
 							Required:    true,
@@ -45,7 +45,7 @@ func getTeamCommands() []*discordgo.ApplicationCommand {
 					Description: "Kick a user from the team",
 					Options: []*discordgo.ApplicationCommandOption{
 						{
-							Type:        discordgo.ApplicationCommandOptionString,
+							Type:        discordgo.ApplicationCommandOptionInteger,
 							Name:        "user_id",
 							Description: "User ID to kick",
 							Required:    true,

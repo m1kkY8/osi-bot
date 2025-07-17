@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/api/htb"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
@@ -18,21 +17,22 @@ func teamKickSlashHandler(client *models.Client) func(s *discordgo.Session, i *d
 			return
 		}
 		sub := i.ApplicationCommandData().Options[0]
-		var userID string
+		var userID int
 		for _, opt := range sub.Options {
 			if opt.Name == "user_id" {
-				userID = opt.StringValue()
+				userID = int(opt.IntValue())
 			}
 		}
-		if userID == "" {
+		if userID == 0 {
 			util.RespondEphemeral(s, i.Interaction, "Missing user ID.")
 			return
 		}
-		err := htb.HTBKickUser(userID)
+		restult, err := client.HTBClient.Teams.KickMember(client.Context, userID)
+		fmt.Println(restult.Data.Message)
 		if err == nil {
-			util.RespondEphemeral(s, i.Interaction, "✅ Kicked user ID %s from the team.")
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("✅ Kicked user ID %d from the team.", userID))
 		} else {
-			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to kick user ID %s: %v", userID, err))
+			util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("❌ Failed to kick user ID %d: %v", userID, err))
 		}
 	}
 }

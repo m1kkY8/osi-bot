@@ -25,12 +25,12 @@ func LeaderboardEmbed(page int, users []models.TeamMember) (*discordgo.MessageEm
 	for i, user := range users[start:end] {
 		index := start + i + 1
 		var medal string
-		switch {
-		case index == 1:
+		switch index {
+		case 1:
 			medal = "🥇"
-		case index == 2:
+		case 2:
 			medal = "🥈"
-		case index == 3:
+		case 3:
 			medal = "🥉"
 		default:
 			medal = fmt.Sprintf("%2d.", index)
@@ -38,7 +38,7 @@ func LeaderboardEmbed(page int, users []models.TeamMember) (*discordgo.MessageEm
 		user.Name = fmt.Sprintf("%s %s", medal, user.Name)
 
 		field := &discordgo.MessageEmbedField{
-			Name:   fmt.Sprintf("%s | Points: %d", user.Name, user.Points),
+			Name:   fmt.Sprintf("%s | Points: %d | ID: %d", user.Name, user.Points, user.ID),
 			Value:  fmt.Sprintf("Rank: %s | User Owns: %d | Root Owns: %d", user.RankText, user.UserOwns, user.RootOwns),
 			Inline: false,
 		}
