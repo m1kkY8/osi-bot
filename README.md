@@ -81,3 +81,109 @@ _This project currently does not have an explicit license. Please add one if you
 ---
 
 > Maintained by [m1kkY8](https://github.com/m1kkY8)
+
+# osi-bot Commands Guide
+
+This bot provides slash commands for managing your HTB Team and Alexandria book stack directly from Discord.  
+Below is a guide for using each command.
+
+---
+
+## HTB Team Management Commands
+
+All HTB team commands are grouped under the `/team` command.
+
+### `/team invitations`
+
+- **Description:** Get all pending join requests to your HTB team.
+- **Usage:**  
+  `/team invitations`  
+  _Replies with a list of users who have requested to join your team._
+
+### `/team accept`
+
+- **Description:** Accept a user’s join request.
+- **Usage:**  
+  `/team accept request_id:12345`  
+  _Replace `12345` with the actual request ID._
+
+### `/team reject`
+
+- **Description:** Reject a user’s join request.
+- **Usage:**  
+  `/team reject request_id:12345`  
+  _Replace `12345` with the actual request ID._
+
+### `/team kick`
+
+- **Description:** Remove a user from your team.
+- **Usage:**  
+  `/team kick user_id:54321`  
+  _Replace `54321` with the user’s ID you want to remove._
+
+### `/team leaderboard`
+
+- **Description:** Show the team leaderboard, sorted by points.
+- **Usage:**  
+  `/team leaderboard`  
+  _Replies with a paginated leaderboard of your team members._
+
+---
+
+## Alexandria Book Stack Commands
+
+All Alexandria commands are grouped under the `/alexandria` command.
+
+### `/alexandria register`
+
+- **Description:** Register a Discord user in Alexandria.
+- **Usage:**  
+  `/alexandria register username:@discorduser`  
+  _Select the user from the Discord user picker._
+
+### `/alexandria update`
+
+- **Description:** Change a user's permission level.
+- **Usage:**  
+  `/alexandria update user_id:123456789 role:viewer`  
+  `/alexandria update user_id:123456789 role:editor`  
+  _Replace `123456789` with the user's ID and choose the desired role._
+
+### `/alexandria remove`
+
+- **Description:** Remove a user from Alexandria.
+- **Usage:**  
+  `/alexandria remove user_id:123456789`  
+  _Replace `123456789` with the user's ID._
+
+### `/alexandria users`
+
+- **Description:** List all registered users in Alexandria.
+- **Usage:**  
+  `/alexandria users`  
+  _Replies with a list of all Alexandria users._
+
+---
+
+## General Notes
+
+- All commands are available as Discord slash commands in servers where the bot is installed.
+- You may need appropriate permissions to use some administrative commands (accept, reject, kick, update, remove).
+- When using commands that require IDs, you can get request or user IDs from the `/team invitations` or `/alexandria users` output.
+
+---
+
+## Example Usage
+
+```
+/team invitations
+/team accept request_id:39622
+/team kick user_id:1184581
+/alexandria register username:@m1kkY8
+/alexandria update user_id:1184581 role:editor
+/alexandria users
+```
+
+---
+
+If you have any issues or questions, check the source code or open an issue in the repository.
