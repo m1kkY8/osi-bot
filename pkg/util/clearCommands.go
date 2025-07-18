@@ -6,9 +6,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// ClearSlashCommands deletes all application (slash) commands from a guild or globally.
-// Pass guildID for guild commands, or "" for global commands.
-// Returns number of deleted commands and error if any.
+/*
+ClearSlashCommands deletes all application (slash) commands from a guild or globally.
+
+Params:
+  - session: Discord session instance used to interact with the Discord API
+  - guildID: Guild ID for guild-specific commands, or empty string ("") for global commands
+
+Returns:
+  - int: Number of successfully deleted commands
+  - error: Error if the operation fails
+*/
 func ClearSlashCommands(session *discordgo.Session, guildID string) (int, error) {
 	appID := session.State.User.ID
 	commands, err := session.ApplicationCommands(appID, guildID)

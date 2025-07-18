@@ -1,30 +1,12 @@
 package models
 
-import "github.com/m1kkY8/osi-bot/pkg/models/roles"
+import "github.com/m1kkY8/osi-bot/pkg/types"
 
-type BookstackUser struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	Roles      []int  `json:"roles"`
-	Language   string `json:"language"`
-	SendInvite bool   `json:"sendInvite"`
-}
+// Re-export types for backward compatibility
+type BookstackUser = types.BookstackUser
+type BookstackUserResponse = types.BookstackUserResponse
 
-type BookstackUserResponse struct {
-	Data  []BookstackUser `json:"data"`
-	Total int             `json:"total"`
-}
-
+// CreateBookstackUser creates a new BookStack user with default values
 func CreateBookstackUser(name, email, password string) *BookstackUser {
-	user := &BookstackUser{
-		Name:       name,
-		Email:      email,
-		Password:   password,
-		Roles:      []int{roles.VIEWER},
-		Language:   "en",
-		SendInvite: false,
-	}
-	return user
+	return types.NewBookstackUser(name, email, password)
 }

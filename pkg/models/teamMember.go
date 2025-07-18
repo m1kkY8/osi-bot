@@ -1,10 +1,6 @@
 package models
 
-type TeamMember struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	RankText string `json:"rank_text"`
-	UserOwns int    `json:"user_owns"`
-	RootOwns int    `json:"root_owns"`
-	Points   int    `json:"points"`
-}
+import "github.com/m1kkY8/osi-bot/pkg/types"
+
+// Re-export types for backward compatibility
+type TeamMember = types.TeamMember

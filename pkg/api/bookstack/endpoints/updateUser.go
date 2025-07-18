@@ -8,7 +8,6 @@ import (
 
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
 	"github.com/m1kkY8/osi-bot/pkg/models"
-	"github.com/m1kkY8/osi-bot/pkg/models/roles"
 )
 
 // Update an existing BookStack user by ID
@@ -42,11 +41,4 @@ func BookApiUpdateUser(id string, user *models.BookstackUser) (int, error) {
 
 	fmt.Printf("[INFO] BookStack API responded with status: %d\n", resp.StatusCode)
 	return resp.StatusCode, nil
-}
-
-// Promote a BookStack user from viewer to editor role
-func PromoteBookstackUserToEditor(existingUser *models.BookstackUser) *models.BookstackUser {
-	user := *existingUser // Copy to avoid mutating original
-	user.Roles = []int{roles.EDITOR}
-	return &user
 }
