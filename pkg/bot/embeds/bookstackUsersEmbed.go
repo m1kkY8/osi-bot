@@ -45,13 +45,5 @@ func ListUsersEmbed(page int, users []models.BookstackUser) (*discordgo.MessageE
 			},
 		},
 	}
-
 	return embed, components
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
