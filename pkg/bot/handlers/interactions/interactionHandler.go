@@ -1,8 +1,10 @@
 package interactions
 
-import "github.com/m1kkY8/osi-bot/pkg/models"
+import (
+	"github.com/m1kkY8/osi-bot/pkg/types"
+)
 
-func RegisterInteractionHandlers(client *models.Client, lbPages, bookstackPages *models.Page) {
+func RegisterInteractionHandlers(client *types.Client, lbPages, bookstackPages *types.Page) {
 	// Register user list interaction handler
 	UserListInteraction(client, bookstackPages)
 

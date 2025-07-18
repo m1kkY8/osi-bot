@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
-func LeaderboardEmbed(page int, users []models.TeamMember) (*discordgo.MessageEmbed, []discordgo.MessageComponent) {
+func LeaderboardEmbed(page int, users []types.TeamMember) (*discordgo.MessageEmbed, []discordgo.MessageComponent) {
 	perPage := 10
 	start := page * perPage
 	end := min(start+perPage, len(users))

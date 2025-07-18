@@ -7,12 +7,11 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
-	"github.com/m1kkY8/osi-bot/pkg/models"
-	"github.com/m1kkY8/osi-bot/pkg/models/roles"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
-func updateUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func updateUserSlashHandler(client *types.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// Check for admin role
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
@@ -46,13 +45,13 @@ func updateUserSlashHandler(client *models.Client) func(s *discordgo.Session, i 
 		}
 
 		// Compose minimal update object
-		updatedUser := &models.BookstackUser{}
+		updatedUser := &types.BookstackUser{}
 		var roleID int
 		switch strings.ToLower(newRole) {
 		case "editor":
-			roleID = roles.EDITOR
+			roleID = types.EDITOR
 		case "viewer":
-			roleID = roles.VIEWER
+			roleID = types.VIEWER
 		default:
 			util.RespondEphemeral(s, i.Interaction, "❌ Invalid role. Choose either 'editor' or 'viewer'.")
 			return

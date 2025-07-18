@@ -4,13 +4,15 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
+type CommandHandler func(*discordgo.Session, *discordgo.InteractionCreate)
+
 func HandleSlashCommand(
-	client *models.Client,
-	lbPages, bookstackPages *models.Page,
+	client *types.Client,
+	lbPages, bookstackPages *types.Page,
 	s *discordgo.Session,
 	i *discordgo.InteractionCreate,
 ) {
@@ -26,7 +28,7 @@ func HandleSlashCommand(
 	}
 }
 
-func handleTeamCommands(client *models.Client, lbPages *models.Page, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func handleTeamCommands(client *types.Client, lbPages *types.Page, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if len(i.ApplicationCommandData().Options) == 0 {
 		util.RespondEphemeral(s, i.Interaction, "Missing subcommand")
 		return
@@ -35,28 +37,23 @@ func handleTeamCommands(client *models.Client, lbPages *models.Page, s *discordg
 	sub := i.ApplicationCommandData().Options[0]
 	fmt.Printf("[LOG] /team %s called by %s\n", sub.Name, i.Member.User.Username)
 
-	var handler func(*discordgo.Session, *discordgo.InteractionCreate)
-	switch sub.Name {
-	case "invitations":
-		handler = teamGetRequestsSlashHandler(client)
-	case "accept":
-		handler = teamAcceptSlashHandler(client)
-	case "reject":
-		handler = teamRejectSlashHandler(client)
-	case "kick":
-		handler = teamKickSlashHandler(client)
-	case "leaderboard":
-		handler = teamLeaderboardSlashHandler(client, lbPages)
-	default:
-		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("Unknown subcommand: %s", sub.Name))
+	// Map of command names to their handlers
+	teamHandlers := map[string]CommandHandler{
+		"invitations": teamGetRequestsSlashHandler(client),
+		"accept":      teamAcceptSlashHandler(client),
+		"reject":      teamRejectSlashHandler(client),
+		"kick":        teamKickSlashHandler(client),
+		"leaderboard": teamLeaderboardSlashHandler(client, lbPages),
 	}
 
-	if handler != nil {
+	if handler, exists := teamHandlers[sub.Name]; exists {
 		handler(s, i)
+	} else {
+		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("Unknown subcommand: %s", sub.Name))
 	}
 }
 
-func handleAlexandriaCommands(client *models.Client, bookstackPages *models.Page, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func handleAlexandriaCommands(client *types.Client, bookstackPages *types.Page, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if len(i.ApplicationCommandData().Options) == 0 {
 		util.RespondEphemeral(s, i.Interaction, "Missing subcommand")
 		return
@@ -65,21 +62,17 @@ func handleAlexandriaCommands(client *models.Client, bookstackPages *models.Page
 	sub := i.ApplicationCommandData().Options[0]
 	fmt.Printf("[LOG] /alexandria %s called by %s\n", sub.Name, i.Member.User.Username)
 
-	var handler func(*discordgo.Session, *discordgo.InteractionCreate)
-	switch sub.Name {
-	case "register":
-		handler = registerUserSlashHandler(client)
-	case "remove":
-		handler = deleteUserSlashHandler(client)
-	case "users":
-		handler = bookUserSlashCommandHandler(client, bookstackPages)
-	case "update":
-		handler = updateUserSlashHandler(client)
-	default:
-		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("Unknown subcommand: %s", sub.Name))
+	// Map of command names to their handlers
+	alexandriaHandlers := map[string]CommandHandler{
+		"register": registerUserSlashHandler(client),
+		"remove":   deleteUserSlashHandler(client),
+		"users":    bookUserSlashCommandHandler(client, bookstackPages),
+		"update":   updateUserSlashHandler(client),
 	}
 
-	if handler != nil {
+	if handler, exists := alexandriaHandlers[sub.Name]; exists {
 		handler(s, i)
+	} else {
+		util.RespondEphemeral(s, i.Interaction, fmt.Sprintf("Unknown subcommand: %s", sub.Name))
 	}
 }

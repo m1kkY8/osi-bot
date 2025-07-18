@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
-func BookApiListUsers() []models.BookstackUser {
-	req, err := http.NewRequest("GET", models.BOOKSTACK_DOMAIN+"/api/users", nil)
+func BookApiListUsers() []types.BookstackUser {
+	req, err := http.NewRequest("GET", types.BOOKSTACK_DOMAIN+"/api/users", nil)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create request:", err)
 		return nil
@@ -34,7 +34,7 @@ func BookApiListUsers() []models.BookstackUser {
 		return nil
 	}
 
-	var response models.BookstackUserResponse
+	var response types.BookstackUserResponse
 	if err := json.Unmarshal(rawBody, &response); err != nil {
 		fmt.Println("[ERROR] Failed to unmarshal users JSON:", err)
 		return nil

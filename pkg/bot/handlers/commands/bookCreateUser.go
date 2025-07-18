@@ -8,12 +8,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/factories"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 // Pass adminRoleID as string argument when registering the handler
-func registerUserSlashHandler(client *models.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func registerUserSlashHandler(client *types.Client) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// Check for admin role
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
@@ -40,10 +41,10 @@ func registerUserSlashHandler(client *models.Client) func(s *discordgo.Session, 
 
 		// Generate credentials for the target user
 		username := strings.ToLower(targetUser.Username)
-		email := fmt.Sprintf("%s@offsecinitiative.net", username)
+		email := fmt.Sprintf("%s@%s", username, types.MAIL_DOMAIN)
 		password := auth.GeneratePassword()
 
-		bookUser := models.CreateBookstackUser(username, email, password)
+		bookUser := factories.CreateBookstackUser(username, email, password)
 		statusCode, _ := endpoints.BookApiCreateUser(bookUser)
 
 		var dmMessage string

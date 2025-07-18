@@ -12,7 +12,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
+	"github.com/m1kkY8/osi-bot/pkg/factories"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
 func main() {
@@ -41,9 +43,9 @@ func main() {
 	}
 
 	// Initialize stateful client and pagers
-	client := models.NewClient(nil, dg)
-	lbPages := models.NewPage(1, 10, 0, make(map[string]int))
-	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
+	client := factories.NewClient(nil, dg)
+	lbPages := factories.NewPage(1, 10, 0, make(map[string]int))
+	bookstackPages := factories.NewPage(1, 10, 0, make(map[string]int))
 
 	// Initialize client state (intents, commands, config)
 	client.HTBClient = *htbClient
@@ -73,7 +75,7 @@ func main() {
 }
 
 // registerUniversalDispatcher wires up the main dispatcher for slash and component interactions.
-func registerUniversalDispatcher(client *models.Client, lbPages, bookstackPages *models.Page) {
+func registerUniversalDispatcher(client *types.Client, lbPages, bookstackPages *types.Page) {
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:
