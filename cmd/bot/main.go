@@ -37,7 +37,7 @@ func main() {
 	client.HTBClient = *htbClient
 	client.Context = ctx
 
-	client.Initialize()
+	models.InitializeClient(client)
 
 	// Register custom interaction handlers (components, buttons, etc.)
 	interactions.RegisterInteractionHandlers(client, lbPages, bookstackPages)

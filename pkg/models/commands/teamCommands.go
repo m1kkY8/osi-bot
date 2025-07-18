@@ -2,7 +2,7 @@ package models
 
 import "github.com/bwmarrin/discordgo"
 
-func getTeamCommands() []*discordgo.ApplicationCommand {
+func GetTeamCommands() []*discordgo.ApplicationCommand {
 	return []*discordgo.ApplicationCommand{
 		{
 			Name:        "team",

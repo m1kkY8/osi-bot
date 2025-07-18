@@ -2,7 +2,6 @@ package embeds
 
 import (
 	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 )
