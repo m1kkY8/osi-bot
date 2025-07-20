@@ -23,9 +23,12 @@ func updateUserSlashHandler(client *types.Client) func(s *discordgo.Session, i *
 		options := i.ApplicationCommandData().Options
 		var userID string
 		var newRole string
+		commandName := options[0].Name
+		commandType := options[0].Type
+		commandOptions := options[0].Options
 
-		if len(options) > 0 && options[0].Name == "update" && options[0].Type == discordgo.ApplicationCommandOptionSubCommand {
-			for _, opt := range options[0].Options {
+		if len(options) > 0 && commandName == "update" && commandType == discordgo.ApplicationCommandOptionSubCommand {
+			for _, opt := range commandOptions {
 				if opt.Name == "user_id" && opt.Type == discordgo.ApplicationCommandOptionString {
 					userID = opt.StringValue()
 				}

@@ -2,12 +2,18 @@ package auth
 
 import (
 	"fmt"
-	"os"
+
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 func GetAuthHeader() map[string]string {
-	tokenId := os.Getenv("BOOKSTACK_ID")
-	tokenSecret := os.Getenv("BOOKSTACK_TOKEN")
+	tokenSecret, tokenId, err := util.LoadAuthEnv()
+
+	if err != nil {
+		fmt.Printf("Error loading BookStack environment variables: %v\n", err)
+		return nil
+	}
+
 	auth := fmt.Sprintf("Token %s:%s", tokenId, tokenSecret)
 
 	return map[string]string{
