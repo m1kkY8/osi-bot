@@ -17,11 +17,10 @@ func HandleSlashCommand(
 	i *discordgo.InteractionCreate,
 ) {
 	data := i.ApplicationCommandData()
-
 	switch data.Name {
-	case "team":
+	case types.CommandTeam:
 		handleTeamCommands(client, lbPages, s, i)
-	case "alexandria":
+	case types.CommandAlexandria:
 		handleAlexandriaCommands(client, bookstackPages, s, i)
 	default:
 		fmt.Printf("[LOG] Unknown command: %s by %s\n", data.Name, i.Member.User.Username)
@@ -39,11 +38,11 @@ func handleTeamCommands(client *types.Client, lbPages *types.Page, s *discordgo.
 
 	// Map of command names to their handlers
 	teamHandlers := map[string]CommandHandler{
-		"invitations": teamGetRequestsSlashHandler(client),
-		"accept":      teamAcceptSlashHandler(client),
-		"reject":      teamRejectSlashHandler(client),
-		"kick":        teamKickSlashHandler(client),
-		"leaderboard": teamLeaderboardSlashHandler(client, lbPages),
+		types.SubcommandInvitations: teamGetRequestsSlashHandler(client),
+		types.SubcommandAccept:      teamAcceptSlashHandler(client),
+		types.SubcommandReject:      teamRejectSlashHandler(client),
+		types.SubcommandKick:        teamKickSlashHandler(client),
+		types.SubcommandLeaderboard: teamLeaderboardSlashHandler(client, lbPages),
 	}
 
 	if handler, exists := teamHandlers[sub.Name]; exists {
@@ -64,10 +63,10 @@ func handleAlexandriaCommands(client *types.Client, bookstackPages *types.Page, 
 
 	// Map of command names to their handlers
 	alexandriaHandlers := map[string]CommandHandler{
-		"register": registerUserSlashHandler(client),
-		"remove":   deleteUserSlashHandler(client),
-		"users":    bookUserSlashCommandHandler(client, bookstackPages),
-		"update":   updateUserSlashHandler(client),
+		types.SubcommandRegister: registerUserSlashHandler(client),
+		types.SubcommandRemove:   deleteUserSlashHandler(client),
+		types.SubcommandUsers:    bookUserSlashCommandHandler(client, bookstackPages),
+		types.SubcommandUpdate:   updateUserSlashHandler(client),
 	}
 
 	if handler, exists := alexandriaHandlers[sub.Name]; exists {

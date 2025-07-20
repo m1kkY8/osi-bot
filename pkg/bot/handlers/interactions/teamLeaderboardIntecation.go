@@ -19,12 +19,12 @@ func LeaderboardInteraction(client *types.Client, pages *types.Page) {
 		page := pages.PageMap[userID]
 
 		switch i.MessageComponentData().CustomID {
-		case "button_next":
+		case types.ButtonNextTeam:
 			page++
 			if page*pages.PerPage >= len(client.TeamMembers) {
 				page = 0
 			}
-		case "button_prev":
+		case types.ButtonPrevTeam:
 			if page == 0 {
 				page = (len(client.TeamMembers) - 1) / pages.PerPage
 			} else {

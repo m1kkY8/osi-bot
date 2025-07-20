@@ -24,12 +24,12 @@ func UserListInteraction(client *types.Client, pages *types.Page) {
 		page := pages.PageMap[userID]
 
 		switch customID {
-		case "button_next_book":
+		case types.ButtonNextBook:
 			page++
 			if page*pages.PerPage >= len(client.BookstackUsers) {
 				page = 0
 			}
-		case "button_prev_book":
+		case types.ButtonPrevBook:
 			if page == 0 {
 				page = (len(client.BookstackUsers) - 1) / pages.PerPage
 			} else {

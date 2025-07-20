@@ -19,7 +19,6 @@ import (
 
 func main() {
 	discordToken, htbToken, err := util.LoadEnv()
-
 	if err != nil {
 		fmt.Printf("Error loading environment variables: %v\n", err)
 		return
