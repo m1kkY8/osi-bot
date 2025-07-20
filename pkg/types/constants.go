@@ -40,3 +40,8 @@ const (
 	SubcommandRemove      = "remove"
 	SubcommandUsers       = "users"
 )
+
+// HTTP Header constants
+const (
+	UNPROCESSABLE_ENTITY = 422
+)

@@ -48,7 +48,7 @@ func registerUserSlashHandler(client *types.Client) func(s *discordgo.Session, i
 		statusCode, _ := endpoints.BookApiCreateUser(bookUser)
 
 		var dmMessage string
-		if statusCode == 422 {
+		if statusCode == types.UNPROCESSABLE_ENTITY {
 			dmMessage = "❌ User already exists. Please try a different username."
 		} else if statusCode >= 300 {
 			dmMessage = "❌ Failed to create BookStack user."
