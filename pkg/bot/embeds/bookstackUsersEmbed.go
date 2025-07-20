@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
-func ListUsersEmbed(page int, users []models.BookstackUser) (*discordgo.MessageEmbed, []discordgo.MessageComponent) {
+func ListUsersEmbed(page int, users []types.BookstackUser) (*discordgo.MessageEmbed, []discordgo.MessageComponent) {
 	perPage := 10
 	start := page * perPage
 	end := min(start+perPage, len(users))

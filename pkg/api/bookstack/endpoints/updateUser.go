@@ -7,19 +7,18 @@ import (
 	"net/http"
 
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
-	"github.com/m1kkY8/osi-bot/pkg/models"
-	"github.com/m1kkY8/osi-bot/pkg/models/roles"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
 // Update an existing BookStack user by ID
-func BookApiUpdateUser(id string, user *models.BookstackUser) (int, error) {
+func BookApiUpdateUser(id string, user *types.BookstackUser) (int, error) {
 	body, err := json.Marshal(user)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to marshal user JSON:", err)
 		return -1, err
 	}
 
-	url := fmt.Sprintf("%s/api/users/%s", models.BOOKSTACK_DOMAIN, id)
+	url := fmt.Sprintf("%s/api/users/%s", types.BOOKSTACK_DOMAIN, id)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create HTTP request:", err)
@@ -42,11 +41,4 @@ func BookApiUpdateUser(id string, user *models.BookstackUser) (int, error) {
 
 	fmt.Printf("[INFO] BookStack API responded with status: %d\n", resp.StatusCode)
 	return resp.StatusCode, nil
-}
-
-// Promote a BookStack user from viewer to editor role
-func PromoteBookstackUserToEditor(existingUser *models.BookstackUser) *models.BookstackUser {
-	user := *existingUser // Copy to avoid mutating original
-	user.Roles = []int{roles.EDITOR}
-	return &user
 }

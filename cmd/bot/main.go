@@ -11,12 +11,19 @@ import (
 	"github.com/gubarz/gohtb"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
+	"github.com/m1kkY8/osi-bot/pkg/factories"
 	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 func main() {
-	htbToken, discordToken, err := util.LoadEnv()
+	discordToken, htbToken, err := util.LoadEnv()
+
+	if err != nil {
+		fmt.Printf("Error loading environment variables: %v\n", err)
+		return
+	}
 
 	ctx := context.Background()
 	htbClient, _ := gohtb.New(htbToken)
@@ -29,15 +36,15 @@ func main() {
 	}
 
 	// Initialize stateful client and pagers
-	client := models.NewClient(nil, dg)
-	lbPages := models.NewPage(1, 10, 0, make(map[string]int))
-	bookstackPages := models.NewPage(1, 10, 0, make(map[string]int))
+	client := factories.NewClient(nil, dg)
+	lbPages := factories.NewPage(1, 10, 0, make(map[string]int))
+	bookstackPages := factories.NewPage(1, 10, 0, make(map[string]int))
 
 	// Initialize client state (intents, commands, config)
 	client.HTBClient = *htbClient
 	client.Context = ctx
 
-	client.Initialize()
+	models.InitializeClient(client)
 
 	// Register custom interaction handlers (components, buttons, etc.)
 	interactions.RegisterInteractionHandlers(client, lbPages, bookstackPages)
@@ -61,7 +68,7 @@ func main() {
 }
 
 // registerUniversalDispatcher wires up the main dispatcher for slash and component interactions.
-func registerUniversalDispatcher(client *models.Client, lbPages, bookstackPages *models.Page) {
+func registerUniversalDispatcher(client *types.Client, lbPages, bookstackPages *types.Page) {
 	client.DiscordSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		switch i.Type {
 		case discordgo.InteractionApplicationCommand:

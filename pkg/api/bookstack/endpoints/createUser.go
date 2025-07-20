@@ -7,17 +7,17 @@ import (
 	"strings"
 
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
-func BookApiCreateUser(user *models.BookstackUser) (int, error) {
+func BookApiCreateUser(user *types.BookstackUser) (int, error) {
 	body, err := json.Marshal(user)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to marshal user JSON:", err)
 		return -1, err
 	}
 
-	req, err := http.NewRequest("POST", models.BOOKSTACK_DOMAIN+"/api/users", strings.NewReader(string(body)))
+	req, err := http.NewRequest("POST", types.BOOKSTACK_DOMAIN+"/api/users", strings.NewReader(string(body)))
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create HTTP request:", err)
 		return -1, err

@@ -8,14 +8,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/gubarz/gohtb/services/teams"
 	"github.com/m1kkY8/osi-bot/pkg/bot/embeds"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
-func customModel(members teams.MembersResponse) []models.TeamMember {
-	var teamMembers []models.TeamMember
+func customModel(members teams.MembersResponse) []types.TeamMember {
+	var teamMembers []types.TeamMember
 	for _, member := range members.Data {
-		teamMember := models.TeamMember{
+		teamMember := types.TeamMember{
 			ID:       member.Id,
 			Name:     member.Name,
 			UserOwns: member.UserOwns,
@@ -33,7 +33,7 @@ func customModel(members teams.MembersResponse) []models.TeamMember {
 	return teamMembers
 }
 
-func teamLeaderboardSlashHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func teamLeaderboardSlashHandler(client *types.Client, pages *types.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// convert string to int
 		teamID, _ := strconv.Atoi(client.GetTeamID())

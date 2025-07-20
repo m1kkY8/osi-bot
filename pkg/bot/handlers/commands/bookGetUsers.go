@@ -7,12 +7,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/endpoints"
 	"github.com/m1kkY8/osi-bot/pkg/bot/embeds"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 // Handler factory: returns a handler func for slash command
-func bookUserSlashCommandHandler(client *models.Client, pages *models.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func bookUserSlashCommandHandler(client *types.Client, pages *types.Page) func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		hasAdmin := slices.Contains(i.Member.Roles, client.GetAdminRoleID())
 		if !hasAdmin {

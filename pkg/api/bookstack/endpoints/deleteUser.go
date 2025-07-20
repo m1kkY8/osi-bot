@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/m1kkY8/osi-bot/pkg/api/bookstack/auth"
-	"github.com/m1kkY8/osi-bot/pkg/models"
+	"github.com/m1kkY8/osi-bot/pkg/types"
 )
 
 func BookApiDeleteUser(id string) error {
-	url := fmt.Sprintf("%s/api/users/%s", models.BOOKSTACK_DOMAIN, id)
+	url := fmt.Sprintf("%s/api/users/%s", types.BOOKSTACK_DOMAIN, id)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("[ERROR] Failed to create request:", err)
