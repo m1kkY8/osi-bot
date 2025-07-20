@@ -9,26 +9,19 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/gubarz/gohtb"
-	"github.com/joho/godotenv"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/commands"
 	"github.com/m1kkY8/osi-bot/pkg/bot/handlers/interactions"
 	"github.com/m1kkY8/osi-bot/pkg/factories"
 	"github.com/m1kkY8/osi-bot/pkg/models"
 	"github.com/m1kkY8/osi-bot/pkg/types"
+	"github.com/m1kkY8/osi-bot/pkg/util"
 )
 
 func main() {
-	// Load environment variables
-	_ = godotenv.Load()
-	discordToken := os.Getenv("DISCORD_TOKEN")
-	if discordToken == "" {
-		fmt.Println("DISCORD_TOKEN not set")
-		return
-	}
+	discordToken, htbToken, err := util.LoadEnv()
 
-	htbToken := os.Getenv("HTB_TOKEN")
-	if discordToken == "" {
-		fmt.Println("HTB_TOKEN not set")
+	if err != nil {
+		fmt.Printf("Error loading environment variables: %v\n", err)
 		return
 	}
 
