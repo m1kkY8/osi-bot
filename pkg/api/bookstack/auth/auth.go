@@ -7,7 +7,7 @@ import (
 )
 
 func GetAuthHeader() map[string]string {
-	tokenSecret, tokenId, err := util.LoadAuthEnv()
+	tokenId, tokenSecret, err := util.LoadAuthEnv()
 
 	if err != nil {
 		fmt.Printf("Error loading BookStack environment variables: %v\n", err)
